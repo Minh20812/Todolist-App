@@ -6,7 +6,7 @@ const App = () => {
     <>
       <ConfigProvider
         theme={{
-          token: { colorTextHeading: "#1570EF" },
+          token: {},
           components: {},
         }}
       >
