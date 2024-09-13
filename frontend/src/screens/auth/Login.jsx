@@ -2,7 +2,7 @@ import { Typography, Form, Card, Button, Input, Checkbox, Space } from "antd";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import SocialLogin from "./components/SocialLogin";
-import handleApi from "../../api/handleApi";
+// import handleApi from "../../api/handleApi";
 
 const { Title, Paragraph, Text } = Typography;
 const Login = () => {
@@ -126,7 +126,7 @@ const Login = () => {
         <div className=" text-center mt-8">
           <Space>
             <Text type="secondary">Don’t have an account?</Text>
-            <Link className=" text-[#1366D9]" to={"/sign-up"}>
+            <Link className=" text-[#1366D9]" to={"/"}>
               Sign up
             </Link>
           </Space>
