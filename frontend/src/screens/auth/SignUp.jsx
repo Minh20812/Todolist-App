@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Card, Form, Input, message, Space, Typography } from "antd";
+import { Form, Input, Button, Card, Typography, Space } from "antd"; // Antd imports
 import { useRegisterMutation } from "../../redux/api/userApiSlice";
 import { setCredentials } from "../../redux/feature/auth/authSlice";
 import { toast } from "react-toastify";
-import SocialLogin from "./components/SocialLogin"; // Ant Design Social Login Component
-import Loader from "./components/Loader"; // Loader component from previous code
+import SocialLogin from "./components/SocialLogin"; // Assuming you have this component
 
 const { Title, Paragraph, Text } = Typography;
 
 const Register = () => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm(); // Form initialization
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const [register, { isLoading: registerLoading }] = useRegisterMutation();
+  const [register, { isLoading }] = useRegisterMutation();
+
   const { userInfo } = useSelector((state) => state.auth);
 
   const { search } = useLocation();
@@ -30,24 +30,19 @@ const Register = () => {
   }, [navigate, redirect, userInfo]);
 
   const submitHandler = async (values) => {
-    const { name, email, password, confirmPassword } = values;
+    const { username, email, password, confirmPassword } = values;
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const res = await register({ username: name, email, password }).unwrap();
-      dispatch(setCredentials({ ...res }));
-      navigate(redirect);
-      toast.success("User successfully registered");
-    } catch (err) {
-      console.log(err);
-      toast.error(err.data.message || "Registration failed");
-    } finally {
-      setIsLoading(false);
+    } else {
+      try {
+        const res = await register({ username, email, password }).unwrap();
+        dispatch(setCredentials({ ...res }));
+        navigate(redirect);
+        toast.success("User successfully registered");
+      } catch (err) {
+        toast.error(err?.data?.message || "Failed to register");
+      }
     }
   };
 
@@ -59,24 +54,25 @@ const Register = () => {
             "https://firebasestorage.googleapis.com/v0/b/manage-storage.appspot.com/o/Group%201122.png?alt=media&token=71368463-dae5-4088-bf2e-6e260103e7ca"
           }
           alt="logo"
-          className=" w-12 h-12"
+          className="w-12 h-12"
         />
       </div>
-      <div className="text-center mb-4">
-        <Title level={2}>Create an Account</Title>
-        <Paragraph>Free trial for 30 days</Paragraph>
+      <div className="text-center">
+        <Title level={2}>Create an account</Title>
+        <Paragraph type="secondary">Free trial 30 days</Paragraph>
       </div>
+
       <Form
-        form={form}
         layout="vertical"
+        form={form}
         onFinish={submitHandler}
-        disabled={isLoading || registerLoading}
+        disabled={isLoading}
         size="large"
       >
         <Form.Item
-          name="name"
+          name={"username"}
           label="Name"
-          rules={[{ required: true, message: "Please enter your name" }]}
+          rules={[{ required: true, message: "Please enter your name!" }]}
         >
           <Input
             placeholder="Enter your name"
@@ -86,52 +82,68 @@ const Register = () => {
         </Form.Item>
 
         <Form.Item
-          name="email"
+          name={"email"}
           label="Email"
+          rules={[{ required: true, message: "Please enter your email!" }]}
+        >
+          <Input
+            placeholder="Enter your email"
+            allowClear
+            type="email"
+            maxLength={100}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name={"password"}
+          label="Password"
           rules={[
-            { required: true, message: "Please enter your email" },
-            { type: "email", message: "Please enter a valid email" },
+            { required: true, message: "Please enter your password!" },
+            { min: 6, message: "Password must be at least 6 characters long" },
           ]}
         >
-          <Input placeholder="Enter your email" allowClear />
+          <Input.Password placeholder="Create password" maxLength={100} />
         </Form.Item>
 
         <Form.Item
-          name="password"
-          label="Password"
-          rules={[{ required: true, message: "Please enter your password" }]}
-        >
-          <Input.Password placeholder="Create a password" allowClear />
-        </Form.Item>
-
-        <Form.Item
-          name="confirmPassword"
+          name={"confirmPassword"}
           label="Confirm Password"
-          rules={[{ required: true, message: "Please confirm your password" }]}
+          dependencies={["password"]}
+          rules={[
+            { required: true, message: "Please confirm your password!" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("password") === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error("Passwords do not match!"));
+              },
+            }),
+          ]}
         >
-          <Input.Password placeholder="Confirm your password" allowClear />
+          <Input.Password placeholder="Confirm password" />
         </Form.Item>
 
-        <Button
-          loading={isLoading || registerLoading}
-          type="primary"
-          htmlType="submit"
-          className="w-full"
-        >
-          {registerLoading ? "Registering..." : "Get started"}
-        </Button>
+        <div className="mt-5 mb-3">
+          <Button
+            loading={isLoading}
+            htmlType="submit"
+            type="primary"
+            style={{ width: "100%" }}
+            size="large"
+          >
+            Get started
+          </Button>
+        </div>
       </Form>
-      {registerLoading && <Loader />}
-      <div className="mt-4">
-        <SocialLogin text={"Sign up with Google"} />
-      </div>
-      <div className="mt-6 text-center">
-        <Text>
-          Already have an account?{" "}
-          <Link to={redirect ? `/login?redirect=${redirect}` : "/login"}>
-            Login
-          </Link>
-        </Text>
+
+      <SocialLogin text={"Sign up with Google"} />
+
+      <div className="mt-3 text-center">
+        <Space>
+          <Text type="secondary">Already have an account?</Text>
+          <Link to={"/login"}>Login</Link>
+        </Space>
       </div>
     </Card>
   );
