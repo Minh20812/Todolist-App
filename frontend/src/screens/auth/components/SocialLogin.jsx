@@ -1,21 +1,63 @@
-import { Button } from "antd";
-import React from "react";
+import { useEffect, useState } from "react";
+import { auth, provider } from "./config";
+import { signInWithPopup } from "firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { setCredentials } from "../../../redux/feature/auth/authSlice";
+import { useLoginMutation } from "../../../redux/api/userApiSlice";
+import { toast } from "react-toastify";
 
-const SocialLogin = ({ text }) => {
+const SocialLogin = () => {
+  const [value, setValue] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [login, { isLoading }] = useLoginMutation();
+  const { userInfo } = useSelector((state) => state.auth);
+
+  const { search } = useLocation();
+  const sp = new URLSearchParams(search);
+  const redirect = sp.get("redirect") || "/";
+
+  useEffect(() => {
+    if (userInfo) {
+      navigate(redirect);
+    }
+  }, [navigate, redirect, userInfo]);
+
+  const handleClick = async (e) => {
+    e.preventDefault();
+    try {
+      // Firebase authentication
+      const result = await signInWithPopup(auth, provider);
+      const email = result.user.email;
+      setValue(email);
+      localStorage.setItem("email", email);
+      console.log(email);
+
+      // Backend login using the email obtained from Firebase
+      const res = await login({ email }).unwrap(); // Pass the email object correctly
+      dispatch(setCredentials({ ...res }));
+      navigate(redirect);
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
+    }
+  };
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    if (storedEmail) {
+      setValue(storedEmail);
+    }
+  }, []);
+
   return (
     <>
-      <Button
-        className=" bg-transparent w-full rounded-[4px] text-gray-700 border-[1px] border-[#D0D5DD]"
-        type="primary"
-        size="large"
-      >
-        <img
-          src="https://img.icons8.com/fluency/48/google-logo.png"
-          alt="logoGg"
-          className=" w-6 h-6"
-        />
-        {text}
-      </Button>
+      <div>
+        <button onClick={handleClick} disabled={isLoading} type="submit">
+          {isLoading ? "Signing In..." : "Sign In With Google"}
+        </button>
+      </div>
     </>
   );
 };

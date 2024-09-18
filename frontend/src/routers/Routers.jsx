@@ -1,14 +1,11 @@
 import React from "react";
 import AuthRouter from "./AuthRouter";
 import MainRouter from "./MainRouter";
-import { Theme } from "@radix-ui/themes";
+import { useSelector } from "react-redux";
 
 const Routers = () => {
-  return (
-    <>
-      <Theme>{1 < 2 ? <AuthRouter /> : <MainRouter />}</Theme>
-    </>
-  );
+  const { userInfo } = useSelector((state) => state.auth);
+  return <>{!userInfo ? <AuthRouter /> : <MainRouter />}</>;
 };
 
 export default Routers;

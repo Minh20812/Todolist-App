@@ -17,8 +17,10 @@ const MainRouter = () => {
       <BrowserRouter>
         <HeaderComponent />
         <div className="flex">
-          <SideComponent />
-          <div className=" flex justify-center items-center bg-slate-400 w-4/5">
+          <div className=" w-1/6">
+            <SideComponent />
+          </div>
+          <div className=" flex justify-center items-center bg-slate-400 h-screen w-5/6">
             <Routes>
               <Route path="/" element={<MainDashboard />} />
               <Route path="/inventory" element={<MainInventory />} />

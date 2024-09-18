@@ -20,7 +20,7 @@ const AuthRouter = () => {
         <div className="w-full lg:w-1/2 flex items-center justify-center">
           <BrowserRouter>
             <Routes>
-              <Route path="/auth" element={<Login />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/" element={<SignUp />} />
             </Routes>
           </BrowserRouter>
