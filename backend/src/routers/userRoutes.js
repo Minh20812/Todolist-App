@@ -2,6 +2,7 @@ import express from "express";
 import {
   createUser,
   loginUser,
+  loginGoogleUser,
   logoutCurrentUser,
   getAllUsers,
   getCurrentUserProfile,
@@ -20,6 +21,7 @@ router
   .post(createUser)
   .get(authenticate, authorizeAdmin, getAllUsers);
 router.post("/auth", loginUser);
+router.post("/login-google", loginGoogleUser);
 router.post("/logout", logoutCurrentUser);
 router
   .route("/profile")

@@ -54,6 +54,44 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
+const loginGoogleUser = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    res.status(400);
+    throw new Error("Email is required");
+  }
+
+  try {
+    // Check if the user already exists
+    let user = await User.findOne({ email });
+    let isNewUser = false;
+
+    if (!user) {
+      // If user doesn't exist, create a new user
+      user = await User.create({
+        username: email.split("@")[0],
+        email,
+        isGoogleUser: true,
+      });
+      isNewUser = true;
+    }
+
+    // Generate token
+    createToken(res, user._id);
+
+    // Send response
+    res.status(isNewUser ? 201 : 200).json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Server error during Google login: " + error.message);
+  }
+});
+
 const logoutCurrentUser = asyncHandler(async (req, res) => {
   res.cookie("jwt", "", {
     httyOnly: true,
@@ -162,6 +200,7 @@ const updateUserById = asyncHandler(async (req, res) => {
 export {
   createUser,
   loginUser,
+  loginGoogleUser,
   logoutCurrentUser,
   getAllUsers,
   getCurrentUserProfile,
