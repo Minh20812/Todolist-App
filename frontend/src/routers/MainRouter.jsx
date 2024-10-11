@@ -3,13 +3,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SideComponent from "../components/SideComponent";
 import HeaderComponent from "../components/HeaderComponent";
 import MainDashboard from "../screens/SideScreens/dashboard/MainDashBoard";
-import MainInventory from "../screens/SideScreens/inventory/MainInventory";
-import MainReports from "../screens/SideScreens/reports/MainReports";
-import MainSuppliers from "../screens/SideScreens/suppliers/MainSuppliers";
-import MainOrders from "../screens/SideScreens/orders/MainOrders";
-import MainManageStore from "../screens/SideScreens/managestore/MainManageStore";
-import Setting from "../screens/SideScreens/settings/Setting";
-import Logout from "../screens/SideScreens/LogOut";
+import MainAddTask from "../screens/SideScreens/addTask/MainAddTask";
+import MainSearch from "../screens/SideScreens/search/MainSearch";
+import MainInbox from "../screens/SideScreens/inbox/MainInbox";
+import MainToday from "../screens/SideScreens/today/MainToday";
+import MainUpcoming from "../screens/SideScreens/upcoming/MainUpcoming";
+import FilterLabels from "../screens/SideScreens/filter&labels/Filter&Labels";
+import MainComplete from "../screens/SideScreens/complete/MainComplete";
 
 const MainRouter = () => {
   return (
@@ -23,13 +23,13 @@ const MainRouter = () => {
           <div className=" flex justify-center items-center bg-slate-400 h-screen w-5/6">
             <Routes>
               <Route path="/" element={<MainDashboard />} />
-              <Route path="/inventory" element={<MainInventory />} />
-              <Route path="/reports" element={<MainReports />} />
-              <Route path="/suppliers" element={<MainSuppliers />} />
-              <Route path="/orders" element={<MainOrders />} />
-              <Route path="/manage-store" element={<MainManageStore />} />
-              <Route path="/settings" element={<Setting />} />
-              <Route path="/log-out" element={<Logout />} />
+              <Route path="/addTask" element={<MainAddTask />} />
+              <Route path="/search" element={<MainSearch />} />
+              <Route path="/inbox" element={<MainInbox />} />
+              <Route path="/today" element={<MainToday />} />
+              <Route path="/upcoming" element={<MainUpcoming />} />
+              <Route path="/filter&labels" element={<FilterLabels />} />
+              <Route path="/completed" element={<MainComplete />} />
             </Routes>
           </div>
         </div>

@@ -68,33 +68,45 @@ const SideComponent = () => {
         </Link>
 
         <Link
-          to="/inventory"
+          to="/addTask"
           className="flex items-center transition-transform transform hover:translate-x-2"
         >
-          <span>Inventory</span>
+          <span> + Add Task</span>
         </Link>
 
-        <Link to="/reports" className="flex relative">
+        <Link to="/search" className="flex relative">
           <div className="flex items-center transition-transform transform hover:translate-x-2">
-            <span>Reports</span>
+            <span>Search</span>
           </div>
         </Link>
 
-        <Link to="/suppliers" className="flex relative">
+        <Link to="/inbox" className="flex relative">
           <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Suppliers</span>
+            <span>Inbox</span>
           </div>
         </Link>
 
-        <Link to="/orders" className="flex relative">
+        <Link to="/today" className="flex relative">
           <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Orders</span>
+            <span>Today</span>
           </div>
         </Link>
 
-        <Link to="/manage-store" className="flex relative">
+        <Link to="/upcoming" className="flex relative">
           <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Manage Store</span>
+            <span>Upcoming</span>
+          </div>
+        </Link>
+
+        <Link to="/filter&labels" className="flex relative">
+          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
+            <span>Filter & Labels</span>
+          </div>
+        </Link>
+
+        <Link to="/completed" className="flex relative">
+          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
+            <span>Completed</span>
           </div>
         </Link>
       </div>
