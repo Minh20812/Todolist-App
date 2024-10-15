@@ -2,9 +2,22 @@ import Task from "../models/TaskModel.js";
 import asyncHandler from "../middlewares/asyncHandler.js";
 
 // Helper function for checking required fields
-const validateTaskFields = ({ taskname, duedate, priority }) => {
-  if (!taskname || !duedate || !priority) {
-    throw new Error("Please provide all the required task fields");
+const validateTaskFields = (data) => {
+  if (
+    !data.taskname ||
+    !data.description ||
+    !data.project ||
+    !data.duedate ||
+    !data.priority
+  ) {
+    throw new Error("Required fields are missing");
+  }
+
+  if (
+    !Array.isArray(data.subtasks) ||
+    data.subtasks.some((subtask) => !subtask.name)
+  ) {
+    throw new Error("Each subtask must have a name");
   }
 };
 
@@ -12,12 +25,12 @@ const addTask = asyncHandler(async (req, res) => {
   const {
     taskname,
     description,
-    subtaskname,
+    subtasks, // receiving array of subtasks
     project,
     duedate,
     priority,
     labels,
-    reminders,
+    reminder, // singular reminder field
     location,
   } = req.body;
 
@@ -32,19 +45,21 @@ const addTask = asyncHandler(async (req, res) => {
     });
   }
 
+  // Create task object including the list of subtasks
   const newTask = new Task({
     taskname,
     description,
-    subtaskname,
+    subtasks: subtasks.map((subtask) => ({ name: subtask.name })), // handle array of subtasks
     project,
     duedate,
     priority,
     labels,
-    reminders,
+    reminders: [new Date(reminder)], // convert reminder to reminders array
     location,
   });
 
   await newTask.save();
+
   return res.status(201).json({
     _id: newTask._id,
     taskname: newTask.taskname,
@@ -123,12 +138,10 @@ const updateTaskById = asyncHandler(async (req, res) => {
       location: updatedTask.location,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Server error while updating the task",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Server error while updating the task",
+      error: error.message,
+    });
   }
 });
 
