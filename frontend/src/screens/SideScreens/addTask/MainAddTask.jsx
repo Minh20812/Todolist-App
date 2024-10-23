@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Transition, Listbox, RadioGroup } from "@headlessui/react";
 import { Fragment } from "react";
 import { useAddTaskMutation } from "../../../redux/api/taskApiSlice";
+import { useGetAllProjectsQuery } from "../../../redux/api/projectApiSlice";
+import {
+  useGetAllLabelsQuery,
+  useAddLabelMutation,
+} from "../../../redux/api/labelApiSlice";
+import AddProject from "./component/AddProject";
+import AddLabel from "./component/AddLabels";
+import MultiSelectLabelDropdown from "./component/MultiSelectedLabel";
 
 const priorities = [
   { name: "Low", value: "low" },
@@ -18,20 +26,55 @@ const repeatOptions = [
 ];
 
 const MainAddTask = () => {
+  const {
+    data: projects,
+    error: projectError,
+    isLoading: isProjectLoading,
+    refetch: refetchProjects,
+  } = useGetAllProjectsQuery();
+
+  const {
+    data: labels,
+    error: labelError,
+    isLoading: isLabelLoading,
+    refetch: refetchLabels,
+  } = useGetAllLabelsQuery();
+
   const [addTask] = useAddTaskMutation();
+  const [addLabel] = useAddLabelMutation(); // Mutation for adding a new label
   const [taskname, setTask] = useState("");
   const [description, setDescription] = useState("");
   const [subtasks, setSubtasks] = useState([{ name: "" }]);
   const [duedate, setDuedate] = useState("");
   const [priority, setPriority] = useState(priorities[0]);
-  const [selectedLabels, setSelectedLabels] = useState([]);
-  const [newLabel, setNewLabel] = useState("");
-  const [labels, setLabels] = useState(["Urgent", "Home", "Work"]);
-  const [project, setProject] = useState("");
+  const [selectedProject, setSelectedProject] = useState("");
+  const [selectedLabels, setSelectedLabels] = useState([]); // Array for multiple label selection
   const [reminder, setReminder] = useState("");
   const [location, setLocation] = useState("");
   const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [newLabelName, setNewLabelName] = useState(""); // New label input
   const [repeatOption, setRepeatOption] = useState(repeatOptions[0]);
+  const [isAddingNewProject, setIsAddingNewProject] = useState(false);
+  const [isAddingNewLabel, setIsAddingNewLabel] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(""); // Success message state
+
+  const handleProjectChange = (e) => {
+    const value = e.target.value;
+    if (value === "add-new") {
+      openProjectModal();
+      setIsAddingNewProject(true);
+      setSelectedProject("");
+      refetchProjects();
+    } else {
+      setIsAddingNewProject(false);
+      setSelectedProject(value);
+    }
+  };
+
+  const handleLabelChange = (newSelectedLabels) => {
+    setSelectedLabels(newSelectedLabels);
+  };
 
   const handleAddSubtask = () => {
     setSubtasks([...subtasks, { name: "" }]);
@@ -44,29 +87,127 @@ const MainAddTask = () => {
       taskname,
       description,
       subtasks,
-      project,
+      project: selectedProject,
       duedate,
       priority: priority.value,
       labels: selectedLabels,
       reminder: new Date(reminder),
       repeat: repeatOption.value,
       location,
+      completed: false,
     };
 
     console.log(data);
 
     try {
       await addTask(data).unwrap();
-      // Reset form
+      // Show success message
+
+      setSuccessMessage("Task added successfully!");
+
+      // Clear form inputs
+
+      setTask("");
+
+      setDescription("");
+
+      setSubtasks([{ name: "" }]);
+
+      setDuedate("");
+
+      setPriority(priorities[0]);
+
+      setSelectedProject("");
+
+      setSelectedLabels([]);
+
+      setReminder("");
+
+      setLocation("");
+
+      setRepeatOption(repeatOptions[0]);
+
+      // Remove success message after 3 seconds
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
     } catch (err) {
       console.log(err);
     }
   };
 
+  const openProjectModal = () => {
+    setIsProjectModalOpen(true);
+  };
+  const closeProjectModal = () => {
+    setIsProjectModalOpen(false);
+  };
+
+  const openLabelModal = () => {
+    setIsLabelModalOpen(true);
+  };
+  const closeLabelModal = () => {
+    setIsLabelModalOpen(false);
+  };
+
+  const handleAddNewLabel = async () => {
+    if (!newLabelName.trim()) return;
+
+    try {
+      // Add the new label via API mutation
+      await addLabel({ labelname: newLabelName }).unwrap();
+      // Refetch labels to update the label list
+      await refetchLabels();
+      // Close the label modal and reset the new label input
+      setIsLabelModalOpen(false);
+      setNewLabelName("");
+    } catch (err) {
+      console.log("Error adding label", err);
+    }
+  };
+
+  useEffect(() => {
+    if (projects) {
+      console.log("Projects were fetched");
+    }
+    if (projectError) {
+      console.log("Error fetching projects", projectError);
+    }
+  }, [projects, projectError]);
+
+  useEffect(() => {
+    if (labels) {
+      console.log("Labels were fetched");
+    }
+    if (labelError) {
+      console.log("Error fetching labels", labelError);
+    }
+  }, [labels, labelError]);
+
+  if (isProjectLoading || isLabelLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (projectError || labelError) {
+    return (
+      <div>
+        Error fetching data: {projectError?.message || labelError?.message}
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-100 flex items-center justify-center">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full">
         <h2 className="text-2xl font-semibold mb-6">Add New Task</h2>
+
+        {/* Success Message */}
+
+        {successMessage && (
+          <div className="mb-4 text-green-600">{successMessage}</div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="flex gap-10">
             <div className=" gap-10">
@@ -106,7 +247,7 @@ const MainAddTask = () => {
                 <div className=" grid-cols-2">
                   {subtasks.map((subtask, index) => (
                     <input
-                      key={index}
+                      key={`subtask-${index}`}
                       type="text"
                       value={subtask.name}
                       onChange={(e) => {
@@ -134,13 +275,26 @@ const MainAddTask = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Project
                 </label>
-                <input
-                  type="text"
-                  value={project}
-                  onChange={(e) => setProject(e.target.value)}
-                  required
+
+                <select
+                  value={isAddingNewProject ? "add-new" : selectedProject}
+                  onChange={handleProjectChange}
                   className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+                  required
+                >
+                  <option value="" disabled>
+                    Select a project
+                  </option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.projectname}
+                    </option>
+                  ))}
+
+                  <option value="add-new" onClick={() => openProjectModal()}>
+                    Add New Project
+                  </option>
+                </select>
               </div>
 
               {/* Priority */}
@@ -251,46 +405,12 @@ const MainAddTask = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Labels
                 </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {labels.map((label) => (
-                    <label key={label} className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedLabels.includes(label)}
-                        onChange={() => {
-                          setSelectedLabels((prev) =>
-                            prev.includes(label)
-                              ? prev.filter((l) => l !== label)
-                              : [...prev, label]
-                          );
-                        }}
-                        className="form-checkbox h-5 w-5 text-indigo-600"
-                      />
-                      <span className="ml-2 text-sm">{label}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    value={newLabel}
-                    onChange={(e) => setNewLabel(e.target.value)}
-                    placeholder="Add new label"
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (newLabel.trim() && !labels.includes(newLabel)) {
-                        setLabels([...labels, newLabel]);
-                        setNewLabel("");
-                      }
-                    }}
-                    className="mt-2 bg-blue-500 text-white py-1 px-4 rounded-md text-sm"
-                  >
-                    Add Label
-                  </button>
-                </div>
+                <MultiSelectLabelDropdown
+                  labels={labels}
+                  selectedLabels={selectedLabels}
+                  onChange={handleLabelChange}
+                  onAddNewLabel={openLabelModal}
+                />
               </div>
 
               {/* Reminder */}
@@ -329,6 +449,10 @@ const MainAddTask = () => {
           </button>
         </form>
       </div>
+
+      <AddLabel isOpen={isLabelModalOpen} closeModal={closeLabelModal} />
+
+      <AddProject isOpen={isProjectModalOpen} closeModal={closeProjectModal} />
     </div>
   );
 };

@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 
-// Define the subtask schema as a part of the task
 const subtaskSchema = mongoose.Schema({
   name: {
     type: String,
-    required: true, // Each subtask must have a name
+    required: true,
   },
 });
 
@@ -19,8 +18,8 @@ const taskSchema = mongoose.Schema(
       required: true,
     },
     subtasks: {
-      type: [subtaskSchema], // Array of subtasks, each with a name field
-      default: [], // Default is an empty array if no subtasks are provided
+      type: [subtaskSchema],
+      default: [],
     },
     project: {
       type: String,
@@ -33,20 +32,24 @@ const taskSchema = mongoose.Schema(
     priority: {
       type: String,
       required: true,
-      enum: ["low", "medium", "high"], // Example of priority levels
+      enum: ["low", "medium", "high"],
       default: "medium",
     },
     labels: {
-      type: [String], // Array of strings for labels/tags
+      type: [String],
       default: [],
     },
     reminders: {
-      type: [Date], // Array of dates for reminders
+      type: [Date],
       default: [],
     },
     location: {
-      type: String, // Location as a string or use an Object for coordinates
+      type: String,
       default: "",
+    },
+    completed: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

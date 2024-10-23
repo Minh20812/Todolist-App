@@ -108,34 +108,52 @@ const updateTaskById = asyncHandler(async (req, res) => {
         .json({ message: `Task with ID ${req.params.id} not found` });
     }
 
-    // Update only the fields that are allowed to be updated
+    // Update fields if provided, or use existing values
     task.taskname = req.body.taskname || task.taskname;
     task.description = req.body.description || task.description;
-    task.subtaskname = req.body.subtaskname || task.subtaskname;
+
+    // Handle `subtasks` as an array of objects
+    task.subtasks = Array.isArray(req.body.subtasks)
+      ? req.body.subtasks
+      : task.subtasks;
+
     task.project = req.body.project || task.project;
     task.duedate = req.body.duedate || task.duedate;
     task.priority = req.body.priority || task.priority;
+
+    // Handle `labels` as an array
     task.labels = Array.isArray(req.body.labels)
       ? req.body.labels
       : task.labels;
+
+    // Handle `reminders` as an array
     task.reminders = Array.isArray(req.body.reminders)
       ? req.body.reminders
       : task.reminders;
+
     task.location = req.body.location || task.location;
 
+    // Update the `completed` status if provided
+    if (req.body.completed !== undefined) {
+      task.completed = req.body.completed;
+    }
+
+    // Save updated task to the database
     const updatedTask = await task.save();
 
+    // Respond with updated task details
     res.json({
       _id: updatedTask._id,
       taskname: updatedTask.taskname,
       description: updatedTask.description,
-      subtaskname: updatedTask.subtaskname,
+      subtasks: updatedTask.subtasks, // Correct subtasks
       project: updatedTask.project,
       duedate: updatedTask.duedate,
       priority: updatedTask.priority,
       labels: updatedTask.labels,
       reminders: updatedTask.reminders,
       location: updatedTask.location,
+      completed: updatedTask.completed,
     });
   } catch (error) {
     res.status(500).json({

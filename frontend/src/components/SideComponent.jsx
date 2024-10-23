@@ -106,7 +106,7 @@ const SideComponent = () => {
 
         <Link to="/completed" className="flex relative">
           <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Completed</span>
+            <span>Completed & Expired</span>
           </div>
         </Link>
       </div>

@@ -1,69 +1,115 @@
-import React, { useEffect, useState } from "react";
-import { useGetAllTasksQuery } from "../../../redux/api/taskApiSlice";
-import UpdateTaskModal from "../component/updateTaskModal";
+import React, { useState } from "react";
+import {
+  useGetAllTasksQuery,
+  useUpdateTaskMutation,
+} from "../../../redux/api/taskApiSlice";
+import TaskDetailModal from "./component/TaskDetailModal";
 
 const MainToday = () => {
-  const { data: tasks, error, isLoading, refetch } = useGetAllTasksQuery();
-  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const { data: tasks, error, isLoading, refetch } = useGetAllTasksQuery(); // Extract refetch
   const [selectedTask, setSelectedTask] = useState(null);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [updateTask] = useUpdateTaskMutation();
 
-  const openUpdateModal = (task) => {
-    setUpdateModalOpen(true);
+  const openTaskModal = (task) => {
     setSelectedTask(task);
+    setModalOpen(true);
   };
 
-  const closeUpdateModal = (task) => {
-    setUpdateModalOpen(false);
+  const closeTaskModal = () => {
+    setModalOpen(false);
     setSelectedTask(null);
   };
 
-  useEffect(() => {
-    if (tasks) {
-      console.log("Tasks was fetched");
-      // console.log("Fetched tasks:", tasks); // Log tasks data
-    }
-    if (error) {
-      console.error("Error fetching tasks:", error); // Log error if any
-    }
-  }, [tasks, error]);
-
   if (isLoading) {
-    return <p>Loading tasks...</p>;
+    return <p className="text-center py-4">Loading tasks...</p>;
   }
 
   if (error) {
-    return <p>Error loading tasks: {error.message}</p>;
+    return (
+      <p className="text-center py-4 text-red-500">
+        Error loading tasks: {error.message}
+      </p>
+    );
   }
 
+  const handleCompleteTask = async (e, taskId) => {
+    e.stopPropagation();
+    try {
+      if (!taskId) {
+        throw new Error("Task ID is missing");
+      }
+
+      const result = await updateTask({
+        id: taskId,
+        completed: true,
+      }).unwrap();
+      console.log("API response after update:", result);
+
+      // Optionally refetch the tasks after update
+      refetch();
+    } catch (error) {
+      console.log("Update failed with error:", error);
+    }
+  };
+
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Today's Tasks</h2>
-      {tasks && tasks.length > 0 ? (
-        <ul className="space-y-4 flex">
-          {tasks.map((task) => (
-            <li key={task._id} className=" p-4 bg-white shadow rounded-lg">
-              <h3 className="text-xl font-semibold">{task.taskname}</h3>
-              <p>SubTask: {task.subtaskname}</p>
-              <p>Description: {task.description}</p>
-              <p>Due Date: {new Date(task.duedate).toLocaleDateString()}</p>
-              <p>Priority: {task.priority}</p>
-              <p>Project: {task.project}</p>
-              <p>Labels: {task.labels}</p>
-              <p>Reminders: {task.reminders}</p>
-              <p>Location: {task.location}</p>
-              <button onClick={() => openUpdateModal(task)}>Edit</button>
-            </li>
-          ))}
-        </ul>
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
+        Today Tasks
+      </h2>
+      {tasks &&
+      tasks.length > 0 &&
+      tasks.filter(
+        (task) =>
+          task.completed === false && Date.parse(task.duedate) > Date.now()
+      ).length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {tasks
+              .filter(
+                (task) =>
+                  task.completed === false &&
+                  Date.parse(task.duedate) > Date.now()
+              )
+              .map((task) => (
+                <div
+                  key={task._id}
+                  className="p-4 sm:p-6 bg-white rounded-lg shadow-lg hover:cursor-pointer"
+                  onClick={() => openTaskModal(task)}
+                >
+                  <h3 className="text-xl font-semibold text-indigo-600">
+                    {task.taskname}
+                  </h3>
+                  <p className="text-gray-600">
+                    <strong>Due Date:</strong>{" "}
+                    {task.duedate
+                      ? new Date(task.duedate).toLocaleDateString()
+                      : "No due date"}
+                  </p>
+                  <button
+                    className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50"
+                    onClick={(e) => handleCompleteTask(e, task._id)}
+                  >
+                    Completed
+                  </button>
+                </div>
+              ))}
+          </div>
+        </>
       ) : (
-        <p>No tasks available.</p>
+        <p className="text-gray-600 text-center">No tasks available.</p>
       )}
-      <UpdateTaskModal
-        isOpen={updateModalOpen}
-        closeModal={closeUpdateModal}
-        task={selectedTask}
-        refetch={refetch}
-      />
+
+      {/* Task Detail Modal */}
+      {selectedTask && (
+        <TaskDetailModal
+          isOpen={isModalOpen}
+          closeModal={closeTaskModal}
+          task={selectedTask}
+          refetch={refetch}
+        />
+      )}
     </div>
   );
 };
