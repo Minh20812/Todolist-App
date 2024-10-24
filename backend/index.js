@@ -15,7 +15,7 @@ const port = process.env.PORT || 5001;
 
 connectDB();
 const app = express();
-const cors = require("cors");
+
 app.use(
   cors({
     origin: "https://todolist-app-theta-five.vercel.app/",
