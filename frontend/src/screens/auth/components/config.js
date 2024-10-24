@@ -2,12 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDiSSiAYvPpK4-iEJd-_xUDKuBEd3mfTNg",
-  authDomain: "manage-storage.firebaseapp.com",
-  projectId: "manage-storage",
-  storageBucket: "manage-storage.appspot.com",
-  messagingSenderId: "919841100036",
-  appId: "1:919841100036:web:b8f27207dbcdc4ea148051",
+  apiKey: "AIzaSyA3Q6qG1YV32EN2zh5ZXTGGE0prH3b-DSg",
+  authDomain: "todolist---app-2ac04.firebaseapp.com",
+  projectId: "todolist---app-2ac04",
+  storageBucket: "todolist---app-2ac04.appspot.com",
+  messagingSenderId: "702796214907",
+  appId: "1:702796214907:web:532adbc73c290b6313e8de",
+  measurementId: "G-563QTBVZ4M",
 };
 
 // Initialize Firebase
