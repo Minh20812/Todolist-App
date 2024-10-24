@@ -22,7 +22,8 @@ app.use(
       "https://todolist-app-theta-five.vercel.app",
       "https://todolist---app-2ac04.firebaseapp.com",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
   })
 );
 
