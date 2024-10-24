@@ -2,6 +2,7 @@ import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 import connectDB from "./config/db.js";
 import userRoutes from "./src/routers/userRoutes.js";
@@ -12,9 +13,15 @@ import labelRoutes from "./src/routers/labelRoutes.js";
 dotenv.config();
 const port = process.env.PORT || 5001;
 
-connectDB(); //kết nối đến cơ sở dữ liệu
-
-const app = express(); //khởi tạo express app
+connectDB();
+const app = express();
+const cors = require("cors");
+app.use(
+  cors({
+    origin: "https://todolist-app-theta-five.vercel.app/",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
