@@ -12,7 +12,7 @@ import {
   updateUserById,
 } from "../controllers/userController.js";
 
-import { authenticate, authorizeAdmin } from "../middlewares/authMiddleware.js";
+import { authenticate, authorizeAdmin } from "../middlewares/authMiddleWare.js";
 
 const router = express.Router();
 
