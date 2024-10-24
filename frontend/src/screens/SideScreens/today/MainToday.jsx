@@ -6,7 +6,7 @@ import {
 import TaskDetailModal from "./component/TaskDetailModal";
 
 const MainToday = () => {
-  const { data: tasks, error, isLoading, refetch } = useGetAllTasksQuery(); // Extract refetch
+  const { data: tasks, error, isLoading, refetch } = useGetAllTasksQuery();
   const [selectedTask, setSelectedTask] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [updateTask] = useUpdateTaskMutation();
@@ -45,8 +45,6 @@ const MainToday = () => {
         completed: true,
       }).unwrap();
       console.log("API response after update:", result);
-
-      // Optionally refetch the tasks after update
       refetch();
     } catch (error) {
       console.log("Update failed with error:", error);
@@ -60,18 +58,27 @@ const MainToday = () => {
       </h2>
       {tasks &&
       tasks.length > 0 &&
-      tasks.filter(
-        (task) =>
-          task.completed === false && Date.parse(task.duedate) > Date.now()
-      ).length > 0 ? (
+      tasks.filter((task) => {
+        const dueDate = new Date(task.duedate).getTime();
+        const reminder = task.reminders?.[0]
+          ? new Date(task.reminders[0]).getTime()
+          : null;
+        const now = Date.now();
+        return task.completed === false && dueDate > now && reminder < now;
+      }).length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {tasks
-              .filter(
-                (task) =>
-                  task.completed === false &&
-                  Date.parse(task.duedate) > Date.now()
-              )
+              .filter((task) => {
+                const dueDate = new Date(task.duedate).getTime();
+                const reminder = task.reminders?.[0]
+                  ? new Date(task.reminders[0]).getTime()
+                  : null;
+                const now = Date.now();
+                return (
+                  task.completed === false && dueDate > now && reminder < now
+                );
+              })
               .map((task) => (
                 <div
                   key={task._id}

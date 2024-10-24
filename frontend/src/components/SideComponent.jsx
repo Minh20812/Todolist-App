@@ -100,7 +100,7 @@ const SideComponent = () => {
 
         <Link to="/filter&labels" className="flex relative">
           <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Filter & Labels</span>
+            <span>Filter & Search</span>
           </div>
         </Link>
 
