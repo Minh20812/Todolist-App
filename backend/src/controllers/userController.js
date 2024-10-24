@@ -33,24 +33,34 @@ const createUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
+  try {
+    const { email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+
+    if (!existingUser) {
+      res.status(401).json({ message: "Invalid email or password" });
+      return;
+    }
+
     const isPasswordValid = await bcrypt.compare(
       password,
       existingUser.password
     );
 
-    if (isPasswordValid) {
-      createToken(res, existingUser._id);
-      res.status(201).json({
-        _id: existingUser._id,
-        username: existingUser.username,
-        email: existingUser.email,
-        isAdmin: existingUser.isAdmin,
-      });
+    if (!isPasswordValid) {
+      res.status(401).json({ message: "Invalid email or password" });
       return;
     }
+
+    createToken(res, existingUser._id);
+    res.status(200).json({
+      _id: existingUser._id,
+      username: existingUser.username,
+      email: existingUser.email,
+      isAdmin: existingUser.isAdmin,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
