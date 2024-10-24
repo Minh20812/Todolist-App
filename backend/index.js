@@ -18,7 +18,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://todolist-app-theta-five.vercel.app/",
+    origin: [
+      "https://todolist-app-theta-five.vercel.app",
+      "https://todolist---app-2ac04.firebaseapp.com",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
