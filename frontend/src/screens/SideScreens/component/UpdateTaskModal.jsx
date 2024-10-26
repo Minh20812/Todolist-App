@@ -256,7 +256,7 @@ const UpdateTaskModal = ({ isOpen, closeModal, task, refetch }) => {
                       htmlFor="reminders"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Reminders
+                      Start date
                     </label>
                     <input
                       type="text"

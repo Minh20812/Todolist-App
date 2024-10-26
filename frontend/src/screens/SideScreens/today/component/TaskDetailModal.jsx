@@ -155,7 +155,9 @@ const TaskDetailModal = ({ isOpen, closeModal, task, refetch }) => {
 
               {/* Reminder */}
               <div>
-                <label className="text-gray-600 font-semibold">Reminder:</label>
+                <label className="text-gray-600 font-semibold">
+                  Start date:
+                </label>
                 <input
                   type="datetime-local"
                   value={reminder ? reminder.split(".")[0] : ""}

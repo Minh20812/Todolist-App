@@ -75,14 +75,16 @@ const MainCompleted = () => {
               .map((task) => (
                 <div
                   key={task._id}
-                  className="p-4 sm:p-6 bg-white rounded-lg shadow-lg hover:cursor-pointer mt-3"
+                  className={`p-4 sm:p-6 rounded-lg shadow-lg hover:cursor-pointer mt-3 ${
+                    task.completed ? "bg-green-500" : "bg-red-500"
+                  }`}
                   onClick={() => openTaskModal(task)}
                 >
-                  <h3 className="text-xl font-semibold text-indigo-600">
+                  <h3 className="text-xl font-semibold text-white">
                     {task.taskname}
                   </h3>
-                  <p className="text-gray-600">
-                    <strong>Due Date:</strong>{" "}
+                  <p className="text-white">
+                    <strong>Due Date:</strong>
                     {task.duedate
                       ? new Date(task.duedate).toLocaleDateString()
                       : "No due date"}
@@ -107,20 +109,22 @@ const MainCompleted = () => {
             {expiredTasks.map((task) => (
               <div
                 key={task._id}
-                className="p-4 sm:p-6 bg-white rounded-lg shadow-lg hover:cursor-pointer mt-3"
+                className={`p-4 sm:p-6 ${
+                  task.completed ? "bg-green-500" : "bg-red-500"
+                } rounded-lg shadow-lg hover:cursor-pointer mt-3`}
                 onClick={() => openTaskModal(task)}
               >
-                <h3 className="text-xl font-semibold text-indigo-600">
+                <h3 className="text-xl font-semibold text-white">
                   {task.taskname}
                 </h3>
-                <p className="text-gray-600">
-                  <strong>Due Date:</strong>{" "}
+                <p className="text-white">
+                  <strong>Due Date:</strong>
                   {task.duedate
                     ? new Date(task.duedate).toLocaleDateString()
                     : "No due date"}
                 </p>
-                <button className="mt-4 w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50">
-                  Task Expired
+                <button className="mt-4 w-full bg-gray-600  text-white py-2 px-4 rounded-lg hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50">
+                  Expired
                 </button>
               </div>
             ))}

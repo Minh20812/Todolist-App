@@ -64,7 +64,7 @@ const MainToday = () => {
           ? new Date(task.reminders[0]).getTime()
           : null;
         const now = Date.now();
-        return task.completed === false && dueDate > now;
+        return task.completed === false && dueDate > now && reminder < now;
       }).length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -75,7 +75,9 @@ const MainToday = () => {
                   ? new Date(task.reminders[0]).getTime()
                   : null;
                 const now = Date.now();
-                return task.completed === false && dueDate > now;
+                return (
+                  task.completed === false && dueDate > now && reminder < now
+                );
               })
               .map((task) => (
                 <div

@@ -41,23 +41,59 @@ const MainAddTask = () => {
   } = useGetAllLabelsQuery();
 
   const [addTask] = useAddTaskMutation();
-  const [addLabel] = useAddLabelMutation(); // Mutation for adding a new label
+  const [addLabel] = useAddLabelMutation();
   const [taskname, setTask] = useState("");
   const [description, setDescription] = useState("");
   const [subtasks, setSubtasks] = useState([{ name: "" }]);
   const [duedate, setDuedate] = useState("");
   const [priority, setPriority] = useState(priorities[0]);
   const [selectedProject, setSelectedProject] = useState("");
-  const [selectedLabels, setSelectedLabels] = useState([]); // Array for multiple label selection
+  const [selectedLabels, setSelectedLabels] = useState([]);
   const [reminder, setReminder] = useState("");
   const [location, setLocation] = useState("");
   const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [newLabelName, setNewLabelName] = useState(""); // New label input
+  const [newLabelName, setNewLabelName] = useState("");
   const [repeatOption, setRepeatOption] = useState(repeatOptions[0]);
   const [isAddingNewProject, setIsAddingNewProject] = useState(false);
   const [isAddingNewLabel, setIsAddingNewLabel] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(""); // Success message state
+  const [successMessage, setSuccessMessage] = useState("");
+  const [reminderError, setReminderError] = useState("");
+
+  const validateReminder = (reminderDate, dueDate) => {
+    if (!reminderDate || !dueDate) return true;
+
+    const reminderDateTime = new Date(reminderDate);
+    const dueDateTime = new Date(dueDate);
+
+    return reminderDateTime < dueDateTime;
+  };
+
+  const handleReminderChange = (e) => {
+    const newReminder = e.target.value;
+    setReminder(newReminder);
+
+    if (duedate && newReminder) {
+      if (!validateReminder(newReminder, duedate)) {
+        setReminderError("Reminder time must be before due date");
+      } else {
+        setReminderError("");
+      }
+    }
+  };
+
+  const handleDueDateChange = (e) => {
+    const newDueDate = e.target.value;
+    setDuedate(newDueDate);
+
+    if (reminder && newDueDate) {
+      if (!validateReminder(reminder, newDueDate)) {
+        setReminderError("Reminder time must be before due date");
+      } else {
+        setReminderError("");
+      }
+    }
+  };
 
   const handleProjectChange = (e) => {
     const value = e.target.value;
@@ -83,6 +119,11 @@ const MainAddTask = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (reminder && duedate && !validateReminder(reminder, duedate)) {
+      setReminderError("Reminder time must be before due date");
+      return;
+    }
+
     const data = {
       taskname,
       description,
@@ -91,7 +132,7 @@ const MainAddTask = () => {
       duedate,
       priority: priority.value,
       labels: selectedLabels,
-      reminder: new Date(reminder),
+      reminder: reminder ? new Date(reminder) : null,
       repeat: repeatOption.value,
       location,
       completed: false,
@@ -101,11 +142,8 @@ const MainAddTask = () => {
 
     try {
       await addTask(data).unwrap();
-      // Show success message
 
       setSuccessMessage("Task added successfully!");
-
-      // Clear form inputs
 
       setTask("");
 
@@ -126,8 +164,6 @@ const MainAddTask = () => {
       setLocation("");
 
       setRepeatOption(repeatOptions[0]);
-
-      // Remove success message after 3 seconds
 
       setTimeout(() => {
         setSuccessMessage("");
@@ -155,11 +191,8 @@ const MainAddTask = () => {
     if (!newLabelName.trim()) return;
 
     try {
-      // Add the new label via API mutation
       await addLabel({ labelname: newLabelName }).unwrap();
-      // Refetch labels to update the label list
       await refetchLabels();
-      // Close the label modal and reset the new label input
       setIsLabelModalOpen(false);
       setNewLabelName("");
     } catch (err) {
@@ -328,14 +361,14 @@ const MainAddTask = () => {
               </div>
 
               {/* Due Date */}
-              <div className="mb-4 flex gap-4 ">
+              <div className="mb-4 flex gap-4">
                 <label className="block text-sm font-medium text-gray-700">
                   Due Date
                 </label>
                 <input
                   type="date"
                   value={duedate}
-                  onChange={(e) => setDuedate(e.target.value)}
+                  onChange={handleDueDateChange}
                   required
                   className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
@@ -416,14 +449,21 @@ const MainAddTask = () => {
               {/* Reminder */}
               <div className="mb-4 flex gap-4">
                 <label className="block text-sm font-medium text-gray-700">
-                  Reminder
+                  Start date
                 </label>
-                <input
-                  type="datetime-local"
-                  value={reminder}
-                  onChange={(e) => setReminder(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+                <div className="w-full">
+                  <input
+                    type="datetime-local"
+                    value={reminder}
+                    onChange={handleReminderChange}
+                    className={`mt-1 block w-full px-3 py-2 bg-white border ${
+                      reminderError ? "border-red-500" : "border-gray-300"
+                    } rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                  />
+                  {reminderError && (
+                    <p className="mt-1 text-sm text-red-500">{reminderError}</p>
+                  )}
+                </div>
               </div>
 
               {/* Location */}
