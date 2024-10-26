@@ -209,7 +209,7 @@ const MainAddTask = () => {
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="flex gap-10">
+          <div className="lg:flex gap-10">
             <div className=" gap-10">
               {/* Task Name */}
               <div className="mb-4 flex gap-4 ">
