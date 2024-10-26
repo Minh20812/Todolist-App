@@ -187,17 +187,17 @@ const MainAddTask = () => {
     setIsLabelModalOpen(false);
   };
 
-  const handleAddNewLabel = async () => {
-    if (!newLabelName.trim()) return;
+  const handleProjectAdded = async (newProjectId) => {
+    await refetchProjects();
+    setSelectedProject(newProjectId);
+    setIsProjectModalOpen(false);
+    setIsAddingNewProject(false);
+  };
 
-    try {
-      await addLabel({ labelname: newLabelName }).unwrap();
-      await refetchLabels();
-      setIsLabelModalOpen(false);
-      setNewLabelName("");
-    } catch (err) {
-      console.log("Error adding label", err);
-    }
+  const handleLabelAdded = async (newLabelId) => {
+    await refetchLabels();
+    setSelectedLabels((prev) => [...prev, newLabelId]);
+    setIsLabelModalOpen(false);
   };
 
   useEffect(() => {
@@ -490,9 +490,17 @@ const MainAddTask = () => {
         </form>
       </div>
 
-      <AddLabel isOpen={isLabelModalOpen} closeModal={closeLabelModal} />
+      <AddLabel
+        isOpen={isLabelModalOpen}
+        closeModal={closeLabelModal}
+        onLabelAdded={handleLabelAdded}
+      />
 
-      <AddProject isOpen={isProjectModalOpen} closeModal={closeProjectModal} />
+      <AddProject
+        isOpen={isProjectModalOpen}
+        closeModal={closeProjectModal}
+        onProjectAdded={handleProjectAdded}
+      />
     </div>
   );
 };
