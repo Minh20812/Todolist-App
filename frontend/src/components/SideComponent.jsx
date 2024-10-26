@@ -1,47 +1,23 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../redux/api/userApiSlice";
 import { logout } from "../redux/feature/auth/authSlice";
 
 const SideComponent = () => {
-  //
   const [isOpen, setIsOpen] = useState(false);
-
-  function openModal() {
-    setIsOpen(true);
-  }
-
-  function closeModal() {
-    setIsOpen(false);
-  }
-
-  //
-
   const { userInfo } = useSelector((state) => state.auth);
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-
-  const toggleSidebar = () => {
-    setShowSidebar(!showSidebar);
-  };
-
-  const closeSidebar = () => {
-    setShowSidebar(false);
-  };
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const [logoutApiCall] = useLogoutMutation();
+
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const toggleSidebar = () => setShowSidebar(!showSidebar);
+  const closeModal = () => setIsOpen(false);
+  const openModal = () => setIsOpen(true);
 
   const logoutHandler = async () => {
     try {
@@ -52,225 +28,172 @@ const SideComponent = () => {
       console.error(error);
     }
   };
+
   return (
-    <div
-      className={`z-[9999] ${
-        showSidebar ? "hidden" : "flex"
-      } xl:flex lg:flex md:hidden sm:hidden flex-col text-white bg-black w-[10%] hover:w-[15%] fixed justify-between min-h-[500px]`}
-      id="navigation-container"
-    >
-      <div className="flex flex-col justify-center">
-        <Link
-          to="/"
-          className="flex items-center transition-transform transform hover:translate-x-2"
-        >
-          <span>Dashboard</span>
-        </Link>
+    <div>
+      {/* Toggle Button for Small Screens */}
+      <button
+        className="block md:hidden p-2 bg-gray-800 text-white"
+        onClick={toggleSidebar}
+      >
+        Menu
+      </button>
 
-        <Link
-          to="/addTask"
-          className="flex items-center transition-transform transform hover:translate-x-2"
-        >
-          <span> + Add Task</span>
-        </Link>
-
-        <Link to="/search" className="flex relative">
-          <div className="flex items-center transition-transform transform hover:translate-x-2">
-            <span>Search</span>
-          </div>
-        </Link>
-
-        <Link to="/inbox" className="flex relative">
-          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Inbox</span>
-          </div>
-        </Link>
-
-        <Link to="/today" className="flex relative">
-          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Today</span>
-          </div>
-        </Link>
-
-        <Link to="/upcoming" className="flex relative">
-          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Upcoming</span>
-          </div>
-        </Link>
-
-        <Link to="/filter&labels" className="flex relative">
-          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Filter & Search</span>
-          </div>
-        </Link>
-
-        <Link to="/completed" className="flex relative">
-          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Completed & Expired</span>
-          </div>
-        </Link>
-      </div>
-
-      <div className="relative">
-        <Link to="/settings" className="flex relative">
-          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <span>Settings</span>
-          </div>
-        </Link>
-
+      {/* Sidebar Container */}
+      <div
+        className={`fixed inset-y-0 left-0 transform ${
+          showSidebar ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 transition-transform duration-300 ease-in-out z-50 bg-black text-white w-64 md:w-1/4 xl:w-1/5 flex flex-col justify-between h-full`}
+      >
+        {/* Close Button for Mobile */}
         <button
-          onClick={openModal}
-          className=" w-full text-left hover:translate-x-2"
+          className="absolute top-4 right-4 md:hidden text-white"
+          onClick={toggleSidebar}
         >
-          Logout
+          X
         </button>
 
-        <Transition appear show={isOpen} as={Fragment}>
-          <Dialog as="div" className="relative z-10" onClose={closeModal}>
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
+        {/* Sidebar Links */}
+        <div className="flex flex-col space-y-4 p-4 mt-8">
+          {[
+            { to: "/", label: "Dashboard" },
+            { to: "/addTask", label: "+ Add Task" },
+            { to: "/typingpractice", label: "Typing Practice" },
+            { to: "/inbox", label: "Inbox" },
+            { to: "/today", label: "Today" },
+            { to: "/upcoming", label: "Upcoming" },
+            { to: "/filter&labels", label: "Filter & Search" },
+            { to: "/completed", label: "Completed & Expired" },
+          ].map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="block px-4 py-2 hover:bg-gray-700 rounded-md"
             >
-              <div className="fixed inset-0 bg-black bg-opacity-25" />
-            </Transition.Child>
+              {link.label}
+            </Link>
+          ))}
+        </div>
 
-            <div className="fixed inset-0 overflow-y-auto">
-              <div className="flex min-h-full items-center justify-center p-4 text-center">
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0 scale-95"
-                  enterTo="opacity-100 scale-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100 scale-100"
-                  leaveTo="opacity-0 scale-95"
-                >
-                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                    <Dialog.Title
-                      as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900"
-                    >
-                      Confirm logout
-                    </Dialog.Title>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Are you sure you want to logout?
-                      </p>
-                    </div>
-
-                    <div className="mt-4 flex justify-end space-x-3">
-                      <button
-                        type="button"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                        onClick={closeModal}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                        onClick={logoutHandler}
-                      >
-                        OK
-                      </button>
-                    </div>
-                  </Dialog.Panel>
-                </Transition.Child>
-              </div>
-            </div>
-          </Dialog>
-        </Transition>
-
-        <button
-          onClick={toggleDropdown}
-          className="flex items-center text-gray-800 focus:outline-none"
-        >
-          {userInfo ? (
-            <span className="text-white">{userInfo.username}</span>
-          ) : null}
-          {userInfo && (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className={`h-4 w-4 ml-1 ${
-                dropdownOpen ? "transform rotate-180" : ""
-              }`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="white"
-            >
-              <path
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d={dropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-              />
-            </svg>
-          )}
-        </button>
-
-        {dropdownOpen && userInfo && (
-          <ul
-            className={`absolute right-0 rounded-lg space-y-2 bg-slate-200 text-black ${
-              !userInfo.isAdmin ? "-top-20" : "-top-80"
-            }`}
+        {/* Settings and Logout */}
+        <div className="flex flex-col items-start space-y-2 p-4">
+          <Link
+            to="/settings"
+            className="w-full text-left hover:bg-gray-700 rounded-md px-4 py-2"
           >
-            {userInfo.isAdmin && (
-              <>
-                <li>
+            Settings
+          </Link>
+          <button
+            onClick={openModal}
+            className="w-full text-left hover:bg-gray-700 rounded-md px-4 py-2"
+          >
+            Logout
+          </button>
+          <button
+            onClick={toggleDropdown}
+            className="w-full text-left hover:bg-gray-700 rounded-md px-4 py-2"
+          >
+            {userInfo?.username}
+          </button>
+          {dropdownOpen && userInfo && (
+            <div className="w-full bg-gray-800 rounded-md shadow-md">
+              {userInfo.isAdmin && (
+                <>
                   <Link
                     to="/admin/dashboard"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-gray-700"
                   >
                     Dashboard
                   </Link>
-                </li>
-                <li>
                   <Link
                     to="/admin/productlist"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-gray-700"
                   >
                     Products
                   </Link>
-                </li>
-                <li>
                   <Link
                     to="/admin/categorylist"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-gray-700"
                   >
                     Category
                   </Link>
-                </li>
-                <li>
                   <Link
                     to="/admin/orderlist"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-gray-700"
                   >
                     Orders
                   </Link>
-                </li>
-                <li>
                   <Link
                     to="/admin/userlist"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-gray-700"
                   >
                     Users
                   </Link>
-                </li>
-              </>
-            )}
-
-            <li>
-              <Link to="/profile" className="block px-4 py-2 hover:bg-gray-100">
+                </>
+              )}
+              <Link to="/profile" className="block px-4 py-2 hover:bg-gray-700">
                 Profile
               </Link>
-            </li>
-          </ul>
-        )}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={closeModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium text-gray-900"
+                  >
+                    Confirm logout
+                  </Dialog.Title>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Are you sure you want to logout?
+                  </p>
+                  <div className="mt-4 flex justify-end space-x-3">
+                    <button
+                      className="bg-gray-100  px-4 py-2 rounded-md text-gray-900 hover:bg-gray-200"
+                      onClick={closeModal}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="bg-red-600 px-4 py-2 rounded-md text-white hover:bg-red-700"
+                      onClick={logoutHandler}
+                    >
+                      OK
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 };
