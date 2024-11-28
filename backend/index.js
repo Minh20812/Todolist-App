@@ -21,6 +21,7 @@ app.use(
     origin: [
       "https://todolist-app-theta-five.vercel.app",
       "https://todolist---app-2ac04.firebaseapp.com",
+      "https://www.minova.click",
     ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
